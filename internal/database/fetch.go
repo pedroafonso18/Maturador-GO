@@ -11,6 +11,7 @@ type Instance struct {
 	InstanceId string
 	Limit      uint
 	IsEvo      bool
+	Numero     string
 }
 
 func FetchConnections() ([]Instance, error) {
@@ -20,7 +21,7 @@ func FetchConnections() ([]Instance, error) {
 	}
 	defer conn.Close(context.Background())
 
-	rows, err := conn.Query(context.Background(), "SELECT name, instance_id, limite, is_evo FROM instances WHERE maturador = TRUE")
+	rows, err := conn.Query(context.Background(), "SELECT name, instance_id, limite, is_evo, numero FROM instances WHERE maturador = TRUE")
 	if err != nil {
 		return nil, fmt.Errorf("query failed: %v", err)
 	}
@@ -29,7 +30,7 @@ func FetchConnections() ([]Instance, error) {
 	var instances []Instance
 	for rows.Next() {
 		var inst Instance
-		if err := rows.Scan(&inst.Name, &inst.InstanceId, &inst.Limit, &inst.IsEvo); err != nil {
+		if err := rows.Scan(&inst.Name, &inst.InstanceId, &inst.Limit, &inst.IsEvo, &inst.Numero); err != nil {
 			fmt.Fprintf(os.Stderr, "Row scan with issues: %v\n", err)
 			continue
 		}
