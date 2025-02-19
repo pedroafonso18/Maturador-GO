@@ -9,13 +9,17 @@ O Maturador-GO é uma ferramenta desenvolvida em Go que gerencia a troca automá
 ## Funcionalidades
 
 - Troca automática de mensagens entre instâncias
+- Funcionamento restrito ao horário comercial (8h às 17h)
 - Suporte para múltiplos tipos de conteúdo:
-  - Mensagens de texto
+  - Mensagens de texto pré-definidas
   - Áudios
   - Stickers
-- Delays aleatórios entre mensagens
+- Delays aleatórios entre mensagens (8-30 segundos)
+- Criação automática do banco de dados
 - Integração com banco de dados PostgreSQL
-- Suporte para múltiplas APIs de WhatsApp (Evolution e WuzAPI)
+- Suporte para múltiplas APIs de WhatsApp:
+  - Evolution API
+  - WuzAPI
 
 ## Configuração
 
@@ -28,7 +32,7 @@ EVO_TOKEN=seu_token_evolution
 WUZ_URL=url_da_api_wuz
 ```
 
-3. Certifique-se de ter a estrutura de pastas correta para os recursos:
+3. Prepare a estrutura de recursos:
 ```
 resources/
 ├── audio/
@@ -39,25 +43,30 @@ resources/
 
 ## Estrutura do Banco de Dados
 
-A tabela `instances` deve conter os seguintes campos:
-- name
-- instance_id
-- limite
-- is_evo
-- numero
-- maturador (boolean)
+O sistema criará automaticamente o banco de dados caso não exista.
+
+Tabela `instances`:
+- name (string): Nome da instância
+- instance_id (string): ID único da instância
+- limite (int): Limite de mensagens
+- is_evo (boolean): Indica se usa Evolution API
+- numero (string): Número do WhatsApp
+- maturador (boolean): Flag para participar da maturação
 
 ## Como Funciona
 
-O sistema:
-1. Busca todas as instâncias marcadas para maturação no banco de dados
-2. Cria um ciclo de troca de mensagens entre as instâncias
-3. Seleciona aleatoriamente o tipo de conteúdo (texto, áudio ou sticker)
-4. Envia as mensagens com delays aleatórios entre 8 e 30 segundos
+1. Verifica se está dentro do horário permitido (8h-17h)
+2. Busca instâncias marcadas para maturação no banco
+3. Cria um ciclo de troca de mensagens:
+   - Seleciona aleatoriamente o tipo de conteúdo
+   - Aplica delays aleatórios entre mensagens
+   - Alterna entre instâncias para simular conversas reais
 
 ## Tecnologias Utilizadas
 
-- Go
-- PostgreSQL (pgx driver)
-- godotenv
-- APIs de WhatsApp (Evolution e WuzAPI)
+- Go 1.22+
+- PostgreSQL com pgx driver
+- godotenv para configuração
+- APIs:
+  - Evolution API
+  - WuzAPI
