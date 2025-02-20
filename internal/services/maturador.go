@@ -26,33 +26,51 @@ func Maturador() {
 
 func processConnections(connections []database.Instance) {
 	delay := rand.IntN(30 - 8)
+	delay2 := rand.IntN(10 - 3)
 	for i := 0; i < len(connections); i++ {
 		sender := connections[i]
 		receiver := connections[(i+1)%len(connections)]
 
-		if err := exchangeMessages(sender, receiver, delay); err != nil {
+		if err := exchangeMessages(sender, receiver, delay, delay2); err != nil {
 			fmt.Printf("error sending message: %s\n", err)
 			continue
 		}
 	}
 }
 
-func exchangeMessages(sender, receiver database.Instance, delay int) error {
+func exchangeMessages(sender, receiver database.Instance, delay int, delay2 int) error {
+
 	templateTipo, templateData := EscolherTemplate()
-	if templateTipo != 0 {
-		return nil
-	}
-
-	if err := sendMessage(sender, receiver, templateData); err != nil {
-		return err
+	if templateTipo == 2 {
+		encoded, err := EncodeStickerToBase64(templateData)
+		if err != nil {
+			return err
+		}
+		if err := sendSticker(sender, receiver, encoded); err != nil {
+			return err
+		}
+	} else {
+		if err := sendMessage(sender, receiver, templateData); err != nil {
+			return err
+		}
 	}
 	time.Sleep(time.Duration(delay) * time.Second)
 
-	if err := sendMessage(receiver, sender, templateData); err != nil {
-		return err
+	templateTipo, templateData = EscolherTemplate()
+	if templateTipo == 2 {
+		encoded, err := EncodeStickerToBase64(templateData)
+		if err != nil {
+			return err
+		}
+		if err := sendSticker(receiver, sender, encoded); err != nil {
+			return err
+		}
+	} else {
+		if err := sendMessage(receiver, sender, templateData); err != nil {
+			return err
+		}
 	}
-	time.Sleep(time.Duration(delay) * time.Second)
-
+	time.Sleep(time.Duration(delay2) * time.Minute)
 	return nil
 }
 
@@ -61,4 +79,11 @@ func sendMessage(from, to database.Instance, message string) error {
 		return api.SendMessageEvo(to.Numero, from.Name, message)
 	}
 	return api.SendMessageWuz(to.Numero, message, from.InstanceId)
+}
+
+func sendSticker(from, to database.Instance, base string) error {
+	if from.IsEvo {
+		return api.SendStickerEvo(to.Numero, from.Name, base)
+	}
+	return api.SendStickerWuz(to.Numero, base, from.InstanceId)
 }

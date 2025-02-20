@@ -13,7 +13,7 @@ func EncodeAudioToBase64(filePath string) (string, error) {
 
 	base64str := base64.StdEncoding.EncodeToString(audioBytes)
 
-	return "data:audio/ogg;base64," + base64str, nil
+	return base64str, nil
 }
 
 func EncodeStickerToBase64(filepath string) (string, error) {
@@ -24,5 +24,5 @@ func EncodeStickerToBase64(filepath string) (string, error) {
 
 	base64str := base64.StdEncoding.EncodeToString(stickerBytes)
 
-	return "data:image/webp;base64," + base64str, nil
+	return base64str, nil
 }
