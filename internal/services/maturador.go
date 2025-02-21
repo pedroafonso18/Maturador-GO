@@ -49,7 +49,7 @@ func exchangeMessages(sender, receiver database.Instance, delay int, delay2 int)
 		if err := sendSticker(sender, receiver, encoded); err != nil {
 			return err
 		}
-	} else {
+	} else if templateTipo == 0 {
 		if err := sendMessage(sender, receiver, templateData); err != nil {
 			return err
 		}
@@ -65,8 +65,16 @@ func exchangeMessages(sender, receiver database.Instance, delay int, delay2 int)
 		if err := sendSticker(receiver, sender, encoded); err != nil {
 			return err
 		}
-	} else {
+	} else if templateTipo == 0 {
 		if err := sendMessage(receiver, sender, templateData); err != nil {
+			return err
+		}
+	} else {
+		encoded, err := EncodeAudioToBase64(templateData)
+		if err != nil {
+			return nil
+		}
+		if err := sendAudio(receiver, sender, encoded); err != nil {
 			return err
 		}
 	}
@@ -86,4 +94,11 @@ func sendSticker(from, to database.Instance, base string) error {
 		return api.SendStickerEvo(to.Numero, from.Name, base)
 	}
 	return api.SendStickerWuz(to.Numero, base, from.InstanceId)
+}
+
+func sendAudio(from, to database.Instance, audio string) error {
+	if from.IsEvo {
+		return api.SendMessageEvo(to.Numero, from.Name, "Sem audio para EVO")
+	}
+	return api.SendAudioWuz(to.Numero, audio, from.InstanceId)
 }
