@@ -1,6 +1,6 @@
 module github.com/pedroafonso18/Maturador-GO
 
-go 1.24.0
+go 1.22
 
 require (
 	github.com/jackc/pgx/v5 v5.7.2
